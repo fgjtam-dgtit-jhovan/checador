@@ -21,7 +21,8 @@ use App\ViewModels\EmployeeViewModel;
 
 use function Laravel\Prompts\form;
 
-class JustificationService {
+class JustificationService
+{
 
     /**
      * justify
@@ -32,24 +33,24 @@ class JustificationService {
      */
     public function justify(NewJustificationRequest $request, EmployeeViewModel $employee)
     {
-        
+
         // * store the file
         $filePath = $this->storeJustificationFile(
             file: $request->file('file'),
             employee_number: $employee->id,
             date: $request->input('initialDay')
         );
-        
+
         DB::beginTransaction();
 
         // get the current user
         $currentUser = Auth::user();
         $startDay = Carbon::parse($request->input("initialDay"));
         $finishDay = Carbon::parse($request->input("endDay"));
-        
+
 
         // * create the justification record(s)
-        $message = "Día ". $startDay->format('d-m-Y')." justificado correctamente";
+        $message = "Día " . $startDay->format('d-m-Y') . " justificado correctamente";
         try {
 
             $justification = Justify::create([
@@ -63,11 +64,10 @@ class JustificationService {
             ]);
 
             // * calculate the message 
-            if( $request->input("endDay") != null ){
-                $message = "Días ". $startDay ." al " . $finishDay->format('d-m-Y')." justificados correctamente";
+            if ($request->input("endDay") != null) {
+                $message = "Días " . $startDay . " al " . $finishDay->format('d-m-Y') . " justificados correctamente";
             }
-
-        }catch(\Throwable $th){
+        } catch (\Throwable $th) {
             Log::error("Fail to create the incident record of the employee {employeeName} from {startData} to {endDate} at JustificationService.justify: {message}", [
                 "employeeName" => $employee->name,
                 "startData" => $request->input('initialDay'),
@@ -91,32 +91,30 @@ class JustificationService {
             // * get the incidents
             $incidents = Collection::empty();
             $dateRange = "";
-            if( !$request->input('multipleDays')) {
+            if (!$request->input('multipleDays')) {
                 $incidents = Incident::where('employee_id', $employee->id)
-                    ->where('date', $request->input('initialDay') )
+                    ->where('date', $request->input('initialDay'))
                     ->get();
 
-                $dateRange = sprintf("del %s", $startDay );
+                $dateRange = sprintf("del %s", $startDay);
             } else {
                 $incidents = Incident::where('employee_id', $employee->id)
-                    ->whereBetween('date', [ $startDay->format("Y-m-d"), $finishDay->format("Y-m-d") ])
+                    ->whereBetween('date', [$startDay->format("Y-m-d"), $finishDay->format("Y-m-d")])
                     ->get();
 
-                $dateRange = sprintf("del %s al %s", $startDay, $finishDay );
+                $dateRange = sprintf("del %s al %s", $startDay, $finishDay);
             }
-        
+
 
             // *  delete the incidens
             $flag = 0;
-            if($incidents){
+            if ($incidents) {
                 foreach ($incidents as $inc) {
                     $inc->delete();
                     $flag++;
                 }
             }
-
-
-        }catch(\Throwable $th){
+        } catch (\Throwable $th) {
             Log::error("Fail to delet the incidents of the employee {employeeName} from {startData} to {endDate} at JustificationService.justify: {message}", [
                 "employeeName" => $employee->name,
                 "startData" => $request->input('initialDay'),
@@ -126,13 +124,13 @@ class JustificationService {
             DB::rollback();
             throw $th;
         }
-        
+
 
         DB::commit();
 
         // * prinf some logs
-        Log::notice('El usuario '.Auth::user()->name.' justificó al empleado '. $employee->name .': ' . $message);
-        if( isset($flag) ){
+        Log::notice('El usuario ' . Auth::user()->name . ' justificó al empleado ' . $employee->name . ': ' . $message);
+        if (isset($flag)) {
             Log::notice("Se eliminó la incidencia (Total: $flag) $dateRange del empleado {employeeName} por el usuario {userName}", [
                 "employeeName" => $employee->name,
                 "employeeId" => $employee->id,
@@ -140,7 +138,6 @@ class JustificationService {
                 "userId" => $currentUser->id
             ]);
         }
-
     }
 
     /**
@@ -174,7 +171,7 @@ class JustificationService {
             $justify->user_id = $currentUser->id;
 
             // * store the file
-            if( $request->file('file') != null ){
+            if ($request->file('file') != null) {
 
                 // * store the new file
                 $filePath = $this->storeJustificationFile(
@@ -188,8 +185,7 @@ class JustificationService {
             }
 
             $justify->save();
-
-        }catch(\Throwable $th){
+        } catch (\Throwable $th) {
             Log::error("Fail to update justify of the employee {employeeName} from {startData} to {endDate} at JustificationService.updateJustify: {message}", [
                 "employeeName" => $employee->name,
                 "startData" => $request->input('initialDay'),
@@ -209,8 +205,7 @@ class JustificationService {
         DB::commit();
 
         // * prinf some logs
-        Log::notice('El usuario '.Auth::user()->name.' modifico la justificacion id ' . $justify->id );
-
+        Log::notice('El usuario ' . Auth::user()->name . ' modifico la justificacion id ' . $justify->id);
     }
 
 
@@ -233,7 +228,7 @@ class JustificationService {
             ->get();
     }
 
-    
+
     /**
      * store the justification file and return the path
      *
@@ -242,10 +237,11 @@ class JustificationService {
      * @param  string    $date
      * @return string
      */
-    private function storeJustificationFile($file, $employee_number, $date): string {
+    private function storeJustificationFile($file, $employee_number, $date): string
+    {
         $cDate = Carbon::parse($date);
         $name = sprintf("%s-%s.pdf", $employee_number, $cDate->format("Y-m-d"));
-        return Storage::disk("local")->putFileAs('justificantes', $file, $name );
+        return Storage::disk("local")->putFileAs('justificantes', $file, $name);
     }
 
     /**
@@ -253,7 +249,8 @@ class JustificationService {
      *
      * @param  string $fileName
      */
-    private function removeFile($fileName): string {
+    private function removeFile($fileName): string
+    {
         try {
             return Storage::disk("local")->delete($fileName);
             Log::notice("File $fileName deleted after update the justification.");
@@ -263,5 +260,35 @@ class JustificationService {
             ]);
         }
     }
-    
+
+    /**
+     * delete the justification by id
+     *
+     * @param  int $justify_id
+     * @return void
+     */    public function deleteJustificationById(int $justify_id): void
+    {
+        // * get the justify
+        $justify = Justify::findOrFail($justify_id);
+        $employee = $justify->employee;
+        DB::beginTransaction();
+        try {
+            // * delete the file
+            $this->removeFile($justify->file);
+
+            // * delete the record
+            $justify->delete();
+        } catch (\Throwable $th) {
+            Log::error("Fail to delete the justify id {justifyId} of the employee {
+                employeeName} at JustificationService.deleteJustificationById: {message}", [
+                "justifyId" => $justify_id,
+                "employeeName" => $employee->name,
+                "message" => $th->getMessage()
+            ]);
+            DB::rollback();
+            throw $th;
+        }
+        DB::commit();
+        Log::notice('El usuario ' . Auth::user()->name . ' eliminó la justificacion id ' . $justify->id . ' del empleado ' . $employee->name);
+    }
 }
