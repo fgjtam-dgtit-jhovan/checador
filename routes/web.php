@@ -113,6 +113,7 @@ Route::middleware(['auth', 'authorized.menu'])->group(function () {
         Route::get('{justification_id}/file', [JustificationController::class, 'getJustificationFile'])->name('file');
         Route::get('{justification_id}/edit', [JustificationController::class, 'editJustify'])->name('edit');
         Route::post('{justification_id}/update', [JustificationController::class, 'updateJustify'])->name('update');
+        Route::delete('{justification_id}', [JustificationController::class, 'destroy'])->name('destroy');
     });
 
     Route::prefix("reports")->name('reports.')->group(function() {

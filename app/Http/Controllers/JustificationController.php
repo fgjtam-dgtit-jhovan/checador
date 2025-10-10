@@ -201,6 +201,42 @@ class JustificationController extends Controller
 
     }
 
+    /**
+     * delete a justification
+     *
+     * @param  int $justification_id
+     * @return mixed
+     */
+    function destroy(int $justification_id){
+
+        // * retrive the justify model
+        $justify = Justify::with(['type','employee'])->find($justification_id);
+        if($justify == null){
+            return response()->json([ "message" => "Justification not found on the system." ], 404);
+        }
+
+        // * get the employee
+        $employee =  $this->findEmployee($justify->employee->employeeNumber());
+        if( $employee instanceof RedirectResponse ){
+            return response()->json([ "message" => "Employee not found on the system." ], 404);
+        }
+
+        // * attempt to delete the justify
+        try {
+            $this->justificationService->deleteJustificationById($justify->id);
+        } catch (\Throwable $th) {
+            Log::error("Fail to delete the justify the day: {message}", [
+                "message" => $th->getMessage()
+            ]);
+
+            return response()->json([ "message" => "Error al eliminar el justificante, intente de nuevo o comuníquese con el administrador." ], 500);
+        }
+
+        return redirect()->route('employees.justifications.index', [
+            "employee_number" => $employee->employeeNumber,
+        ])->with('success', 'Justificante eliminado correctamente.');
+
+    }
 
     /**
      * show the view for display the justifications of the employee
