@@ -84,10 +84,11 @@ class ValidateAccessEmployee
     {
         $userGeneralDirectionId = $user->general_direction_id;
         $employeeNumber = $employee->employee_number;
+        $employeeGeneralDirectionId = $employee->general_direction_id;
 
-        // Caso 1: Usuario de GD 16 (VLCPC) puede ver empleados específicos de GD 18
+        // Caso 1: Usuario de GD 16 (VLCPC) puede ver empleados de GD 17 y 18
         if ($userGeneralDirectionId == 16) {
-            if (in_array($employeeNumber, self::EMPLOYEES_VLCPC)) {
+            if ($employeeGeneralDirectionId == 17 || $employeeGeneralDirectionId == 18) {
                 return true;
             }
         }
