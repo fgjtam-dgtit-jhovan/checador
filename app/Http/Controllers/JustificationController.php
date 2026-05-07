@@ -52,7 +52,12 @@ class JustificationController extends Controller
                     return $query->whereHas('employee', function($emp) use($__currentLevel, $__authUser) {
                         if ($__currentLevel >= 2)
                         {
-                            $emp->where('general_direction_id', $__authUser->general_direction_id );
+                            // GD 16 puede ver empleados de GD 16, 17 y 18
+                            if ($__authUser->general_direction_id == 16) {
+                                $emp->whereIn('general_direction_id', [16, 17, 18]);
+                            } else {
+                                $emp->where('general_direction_id', $__authUser->general_direction_id );
+                            }
                         }
                         if($__currentLevel >= 3)
                         {

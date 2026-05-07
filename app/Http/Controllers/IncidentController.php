@@ -661,12 +661,9 @@ class IncidentController extends Controller
                     ->whereNotIn('employee_number', $allSpecialEmployees);
             });
         } elseif ($generalDirectionId == 16) {
-            // GD 16: Incluir empleados de VLCPC (que están en GD 18)
-            $incidentsQuery->whereHas("employee", function ($employee) use ($generalDirectionId, $employeesVLCPC) {
-                $employee->where(function ($q) use ($generalDirectionId, $employeesVLCPC) {
-                    $q->where('general_direction_id', $generalDirectionId)
-                        ->orWhereIn('employee_number', $employeesVLCPC);
-                });
+            // GD 16: Incluir todos los empleados de GD 16, 17 y 18
+            $incidentsQuery->whereHas("employee", function ($employee) use ($generalDirectionId) {
+                $employee->whereIn('general_direction_id', [16, 17, 18]);
             });
         }/* elseif ($generalDirectionId == 17) {
             // GD 17: Incluir TODOS los empleados especiales (VLCPC + Procesos)

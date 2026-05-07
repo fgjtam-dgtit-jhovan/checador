@@ -66,12 +66,9 @@ class EmployeeService
                             ->whereNotIn('employee_number', $employeesVLCPC)
                             ->whereNotIn('employee_number', $employeesProcesos);
                     }
-                    // GD = 16: Incluir empleados específicos (que normalmente estarían en GD 18)
+                    // GD = 16: Incluir todos los empleados de GD 16, 17 y 18
                     elseif ($generalDirectionId == 16) {
-                        $query->where(function ($q) use ($employeesVLCPC) {
-                            $q->where('general_direction_id', 16)
-                                ->orWhereIn('employee_number', $employeesVLCPC);
-                        });
+                        $query->whereIn('general_direction_id', [16, 17, 18]);
                     }
                     // GD = 17: Incluir empleados específicos (que normalmente estarían en GD 18)
                     elseif ($generalDirectionId == 17) {
@@ -117,10 +114,7 @@ class EmployeeService
                         ->whereNotIn('employee_number', $employeesVLCPC)
                         ->whereNotIn('employee_number', $employeesProcesos);
                 } elseif ($userGeneralDirectionId == 16) {
-                    $query->where(function ($q) use ($employeesVLCPC) {
-                        $q->where('general_direction_id', 16)
-                            ->orWhereIn('employee_number', $employeesVLCPC);
-                    });
+                    $query->whereIn('general_direction_id', [16, 17, 18]);
                 } elseif ($userGeneralDirectionId == 17) {
                     $query->where(function ($q) use ($employeesProcesos) {
                         $q->where('general_direction_id', 17)
@@ -139,10 +133,7 @@ class EmployeeService
                             ->whereNotIn('employee_number', $employeesVLCPC)
                             ->whereNotIn('employee_number', $employeesProcesos);
                     } elseif ($generalDirectionId == 16) {
-                        $query->where(function ($q) use ($employeesVLCPC) {
-                            $q->where('general_direction_id', 16)
-                                ->orWhereIn('employee_number', $employeesVLCPC);
-                        });
+                        $query->whereIn('general_direction_id', [16, 17, 18]);
                     } elseif ($generalDirectionId == 17) {
                         $query->where(function ($q) use ($employeesProcesos) {
                             $q->where('general_direction_id', 17)
@@ -238,11 +229,8 @@ class EmployeeService
 
             // Aplicar reglas especiales según la GD del usuario
             if ($userGeneralDirectionId == 16) {
-                // Usuario de GD 16: Ver empleados de GD 16 + empleados VLCPC
-                $query->where(function ($q) use ($userGeneralDirectionId, $employeesVLCPC) {
-                    $q->where('general_direction_id', $userGeneralDirectionId)
-                        ->orWhereIn('employee_number', $employeesVLCPC);
-                });
+                // Usuario de GD 16: Ver todos los empleados de GD 16, 17 y 18
+                $query->whereIn('general_direction_id', [16, 17, 18]);
             } elseif ($userGeneralDirectionId == 17) {
                 // Usuario de GD 17: Ver empleados de GD 17 + TODOS los empleados especiales
                 $query->where(function ($q) use ($userGeneralDirectionId, $allSpecialEmployees) {
