@@ -463,7 +463,7 @@ class ReportController extends Controller
         //GENERAL DIRECTION VLCPC ID = 16
         // * Special business rules for specific General Directions
         $employeesVLCPC = [
-            20902, // BRENDA LIZZETH SANCHEZ PICASSO
+            //20902, // BRENDA LIZZETH SANCHEZ PICASSO
             10829, // HOMERO GONZALEZ SANCHEZ
             48461, // YARAHI JOSELIN SILVERIO DUQUE
             7057, // MA. IGNACIA RUIZ RETA

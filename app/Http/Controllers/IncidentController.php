@@ -669,7 +669,7 @@ class IncidentController extends Controller
     {
         // Empleados especiales para reglas de negocio
         $employeesVLCPC = [
-            20902, // BRENDA LIZZETH SANCHEZ PICASSO
+            //20902, // BRENDA LIZZETH SANCHEZ PICASSO
             10829, // HOMERO GONZALEZ SANCHEZ
             48461, // YARAHI JOSELIN SILVERIO DUQUE
             7057,  // MA. IGNACIA RUIZ RETA
