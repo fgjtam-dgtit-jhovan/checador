@@ -9,7 +9,7 @@ class ValidateAccessEmployee
 {
     // Empleados especiales para reglas de negocio
     private const EMPLOYEES_VLCPC = [
-        20902, // BRENDA LIZZETH SANCHEZ PICASSO
+        //20902, // BRENDA LIZZETH SANCHEZ PICASSO
         10829, // HOMERO GONZALEZ SANCHEZ
         48461, // YARAHI JOSELIN SILVERIO DUQUE
         7057,  // MA. IGNACIA RUIZ RETA
