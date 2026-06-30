@@ -42,7 +42,7 @@ const togglePasswordVisibility = () => {
 
     <div class="h-screen md:flex">
         <div
-            class="relative overflow-hidden md:flex w-1/2 bg-gradient-to-tr from-blue-800 to-gray-700 i justify-around items-center hidden"
+            class="relative overflow-hidden md:flex w-1/2 bg-gradient-to-tr from-gray-900 to-gray-800 i justify-around items-center hidden"
         >
             <div>
                 <h1 class="text-white font-bold text-4xl font-sans">Sistema de Registro de Asistencia</h1>
@@ -120,7 +120,7 @@ const togglePasswordVisibility = () => {
                 </div>
                 <button 
                     type="submit" 
-                    class="block w-full bg-blue-600 mt-4 py-4 rounded-2xl text-white font-semibold mb-2 hover:bg-blue-700"
+                    class="block w-full bg-gray-600 mt-4 py-4 rounded-2xl text-white font-semibold mb-2 hover:bg-gray-700"
                     :class="{ 'opacity-25': form.processing }" 
                     :disabled="form.processing"
                 >
