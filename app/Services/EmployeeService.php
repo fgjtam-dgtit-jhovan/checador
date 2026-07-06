@@ -13,6 +13,7 @@ use App\Models\{
     WorkingHours,
     WorkingDays
 };
+use App\Helpers\ValidateAccessEmployee;
 use App\ViewModels\EmployeeViewModel;
 
 class EmployeeService
@@ -121,7 +122,12 @@ class EmployeeService
                             ->orWhereIn('employee_number', $employeesProcesos);
                     });
                 } else {
-                    $query->where('general_direction_id', $userGeneralDirectionId);
+                    $allowedGdIds = ValidateAccessEmployee::getAllowedGeneralDirectionIds($__authUser);
+                    if (!empty($allowedGdIds)) {
+                        $query->whereIn('general_direction_id', $allowedGdIds);
+                    } else {
+                        $query->where('general_direction_id', $userGeneralDirectionId);
+                    }
                 }
             } else {
                 if (isset($filters['general_direction_id'])) {
@@ -244,7 +250,12 @@ class EmployeeService
             } else {
                 // Otras GDs: Comportamiento normal por nivel
                 if ($__currentLevel >= 2) {
-                    $query->where('general_direction_id', $userGeneralDirectionId);
+                    $allowedGdIds = ValidateAccessEmployee::getAllowedGeneralDirectionIds($__authUser);
+                    if (!empty($allowedGdIds)) {
+                        $query->whereIn('general_direction_id', $allowedGdIds);
+                    } else {
+                        $query->where('general_direction_id', $userGeneralDirectionId);
+                    }
                 }
             }
 

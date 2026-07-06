@@ -27,6 +27,32 @@ class ValidateAccessEmployee
     ];
 
     /**
+     * Obtener las direcciones generales que un usuario puede consultar.
+     */
+    public static function getAllowedGeneralDirectionIds(User $user): array
+    {
+        if ($user->level_id == 1) {
+            return [];
+        }
+
+        $allowedGdIds = [$user->general_direction_id];
+
+        if ($user->general_direction_id == 12) {
+            return [11, 12, 13, 14];
+        }
+
+        if ($user->general_direction_id == 16) {
+            return [16, 17, 18];
+        }
+
+        if ($user->general_direction_id == 17) {
+            return [17, 18];
+        }
+
+        return $allowedGdIds;
+    }
+
+    /**
      * validate if the user has access to the employee
      *
      * @return bool
@@ -50,7 +76,7 @@ class ValidateAccessEmployee
 
             // Reglas normales de jerarquía
             if ($__currentLevel >= 2) {
-                if ($user->general_direction_id != $employee->general_direction_id) {
+                if (!in_array($employee->general_direction_id, self::getAllowedGeneralDirectionIds($user), true)) {
                     $__hasAccess = false;
                 }
             }
