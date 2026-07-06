@@ -28,4 +28,18 @@ class ValidateAccessEmployeeTest extends TestCase
         $this->assertTrue(ValidateAccessEmployee::validateUser($user, $anotherAllowedEmployee));
         $this->assertFalse(ValidateAccessEmployee::validateUser($user, $notAllowedEmployee));
     }
+
+    public function test_level_three_user_from_general_direction_12_can_access_related_general_directions(): void
+    {
+        $user = new User();
+        $user->level_id = 3;
+        $user->general_direction_id = 12;
+        $user->direction_id = 999;
+
+        $employee = new Employee();
+        $employee->general_direction_id = 14;
+        $employee->direction_id = 1000;
+
+        $this->assertTrue(ValidateAccessEmployee::validateUser($user, $employee));
+    }
 }

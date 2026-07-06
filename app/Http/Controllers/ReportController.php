@@ -465,6 +465,10 @@ class ReportController extends Controller
                 ->whereNotIn('employee_number', $employeesVLCPC)
                 ->whereNotIn('employee_number', $employeesProcesos);
         }
+        // GD = 12: Incluir empleados de GD 11, 12, 13 y 14
+        elseif ($generalDirectionId == 12) {
+            $employeesQuery->whereIn('general_direction_id', [11, 12, 13, 14]);
+        }
         // GD = 16: Incluir todos los empleados de GD 16, 17 y 18
         elseif ($generalDirectionId == 16) {
             $employeesQuery->whereIn('general_direction_id', [16, 17, 18]);

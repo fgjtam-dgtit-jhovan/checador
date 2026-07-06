@@ -688,6 +688,11 @@ class IncidentController extends Controller
                 $employee->where('general_direction_id', $generalDirectionId)
                     ->whereNotIn('employee_number', $allSpecialEmployees);
             });
+        } elseif ($generalDirectionId == 12) {
+            // GD 12: Incluir empleados de GD 11, 12, 13 y 14
+            $incidentsQuery->whereHas("employee", function ($employee) {
+                $employee->whereIn('general_direction_id', [11, 12, 13, 14]);
+            });
         } elseif ($generalDirectionId == 16) {
             // GD 16: Incluir todos los empleados de GD 16, 17 y 18
             $incidentsQuery->whereHas("employee", function ($employee) use ($generalDirectionId) {
