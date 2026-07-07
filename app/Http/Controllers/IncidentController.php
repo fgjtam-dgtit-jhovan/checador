@@ -87,7 +87,7 @@ class IncidentController extends Controller
                 }
             }
 
-            $employees = $this->getEmployeesWithIncidentsByDirection($generalDirecctionId, $startOfMonth, $endOfMonth);
+            $employees = $this->getEmployeesWithIncidentsByDirection($generalDirecctionId, $startOfMonth, $endOfMonth, $AUTH_USER->general_direction_id);
         }
 
 
@@ -465,7 +465,7 @@ class IncidentController extends Controller
 
             $title = "Reporte de incidencias del " . $startDate->format('d M Y') . ' al ' . $endDate->format('d M Y');
         }
-        $employees = $this->getEmployeesWithIncidentsByDirection($__generalDirection, $startDate, $endDate);
+        $employees = $this->getEmployeesWithIncidentsByDirection($__generalDirection, $startDate, $endDate, Auth::user()->general_direction_id);
         $employees = array_map(fn($item) => (array) $item, $employees);
 
         // * get the incident of each employee for the report
@@ -647,9 +647,10 @@ class IncidentController extends Controller
      * @param  int|string $generalDirecctionId
      * @param  string|Date|Carbon $from
      * @param  string|Date|Carbon $to
+     * @param  int $userGeneralDirectionId
      * @return array<EmployeeViewModel>
      */
-    private function getEmployeesWithIncidentsByDirection(int $generalDirectionId, $from, $to)
+    private function getEmployeesWithIncidentsByDirection(int $generalDirectionId, $from, $to, int $userGeneralDirectionId)
     {
         // Empleados especiales para reglas de negocio
         $employeesVLCPC = [
@@ -682,11 +683,18 @@ class IncidentController extends Controller
         }
 
         // Aplicar reglas especiales según la GD seleccionada
+        // Aplicar reglas especiales según la GD seleccionada y GD del usuario
         if ($generalDirectionId == 18) {
-            // GD 18: Excluir empleados específicos
-            $incidentsQuery->whereHas("employee", function ($employee) use ($generalDirectionId, $allSpecialEmployees) {
-                $employee->where('general_direction_id', $generalDirectionId)
-                    ->whereNotIn('employee_number', $allSpecialEmployees);
+            // GD 18: Excluir empleados específicos, pero permitir EMPLOYEES_PROCESOS si es usuario de GD 17
+            $incidentsQuery->whereHas("employee", function ($employee) use ($generalDirectionId, $userGeneralDirectionId, $employeesProcesos, $employeesVLCPC) {
+                if ($userGeneralDirectionId == 17) {
+                    // Usuario de GD 17 viendo GD 18: mostrar solo EMPLOYEES_PROCESOS
+                    $employee->whereIn('employee_number', $employeesProcesos);
+                } else {
+                    // Otros usuarios: excluir empleados especiales
+                    $employee->where('general_direction_id', $generalDirectionId)
+                        ->whereNotIn('employee_number', array_merge($employeesVLCPC, $employeesProcesos));
+                }
             });
         } elseif ($generalDirectionId == 12) {
             // GD 12: Incluir empleados de GD 11, 12, 13 y 14
@@ -698,15 +706,15 @@ class IncidentController extends Controller
             $incidentsQuery->whereHas("employee", function ($employee) use ($generalDirectionId) {
                 $employee->whereIn('general_direction_id', [16, 17, 18]);
             });
-        }/* elseif ($generalDirectionId == 17) {
-            // GD 17: Incluir TODOS los empleados especiales (VLCPC + Procesos)
-            $incidentsQuery->whereHas("employee", function ($employee) use ($generalDirectionId, $allSpecialEmployees) {
-                $employee->where(function ($q) use ($generalDirectionId, $allSpecialEmployees) {
+        } elseif ($generalDirectionId == 17) {
+            // GD 17: Incluir empleados de GD 17 + EMPLOYEES_PROCESOS de GD 18
+            $incidentsQuery->whereHas("employee", function ($employee) use ($generalDirectionId, $employeesProcesos) {
+                $employee->where(function ($q) use ($generalDirectionId, $employeesProcesos) {
                     $q->where('general_direction_id', $generalDirectionId)
-                        ->orWhereIn('employee_number', $allSpecialEmployees);
+                        ->orWhereIn('employee_number', $employeesProcesos);
                 });
             });
-        }*/ else {
+        } else {
             // Resto de GDs: Comportamiento normal
             $incidentsQuery->whereHas("employee", function ($employee) use ($generalDirectionId) {
                 $employee->where('general_direction_id', $generalDirectionId);
@@ -725,7 +733,7 @@ class IncidentController extends Controller
         ])->whereIn('id', array_keys($groupedByEmployee));
 
         // * filter employees by the user-level
-        if (Auth::user()->level_id > 1) {
+        if (Auth::user()->level_id > 2) {
             $employeesOfUser = $this->employeeService->getEmployeesOfUser();
             $employeesQuery->whereIn('id', $employeesOfUser->pluck('id')->all());
         }
