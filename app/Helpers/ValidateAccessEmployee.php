@@ -55,9 +55,10 @@ class ValidateAccessEmployee
     private static function hasGeneralDirectionScopeAccess(User $user, Employee $employee): bool
     {
         $allowedGeneralDirections = self::getAllowedGeneralDirectionIds($user);
+        $employeeGeneralDirectionId = intval($employee->general_direction_id);
 
         return !empty($allowedGeneralDirections)
-            && in_array($employee->general_direction_id, $allowedGeneralDirections, true);
+            && in_array($employeeGeneralDirectionId, $allowedGeneralDirections, true);
     }
 
     /**
